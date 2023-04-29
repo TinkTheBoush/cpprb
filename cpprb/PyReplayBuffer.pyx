@@ -690,7 +690,7 @@ cdef class NstepBuffer:
                     pass
                 elif (self.Nstep_next is not None
                       and np.isin(name,self.Nstep_next).any()) or name == "done":
-                    stored_b[:end] = np.tile(self._extract(kwargs,name)[-1],(end,1))
+                    stored_b[:end] = np.repeat(np.expand_dims(self._extract(kwargs,name)[-1], axis=0),repeats=end,axis=0)
                 else:
                     stored_b[self.stored_size:end] = self._extract(kwargs,name)
 
@@ -761,7 +761,7 @@ cdef class NstepBuffer:
                   and np.isin(name,self.Nstep_next).any() or name == "done"):
                 ext_b = self._extract(kwargs,name)
                 
-                stored_b[:] = np.tile(self._extract(kwargs,name)[-1],(self.buffer_size,1))
+                stored_b[:] = np.repeat(np.expand_dims(ext_b[-1], axis=0),repeats=self.buffer_size,axis=0)
                 kwargs[name] = ext_b
             else:
                 ext_b = self._extract(kwargs,name)
@@ -823,8 +823,11 @@ cdef class NstepBuffer:
         """
         kwargs = {k: v[:self.stored_size].copy() for k, v in self.buffer.items()}
         done = kwargs["done"]
-        for i in range(self.stored_size):
-            done[i] = 1 - (1 - done[i])/np.power(self.Nstep_gamma,i+1)
+        if done[0]:
+            pass
+        else:
+            for i in range(self.stored_size):
+                done[i] = (1 - done[i])/np.power(self.Nstep_gamma,i+1) - 1
         self.clear()
         return kwargs
 
