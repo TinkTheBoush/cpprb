@@ -689,9 +689,8 @@ cdef class NstepBuffer:
                     # Calculate later.
                     pass
                 elif (self.Nstep_next is not None
-                      and np.isin(name,self.Nstep_next).any()):
-                    # Do nothing.
-                    pass
+                      and np.isin(name,self.Nstep_next).any()) or name == "done":
+                    stored_b[:end] = np.tile(self._extract(kwargs,name)[-1],(end,1))
                 else:
                     stored_b[self.stored_size:end] = self._extract(kwargs,name)
 
@@ -759,6 +758,21 @@ cdef class NstepBuffer:
                 # Calculated.
                 pass
             elif (self.Nstep_next is not None
+                  and np.isin(name,self.Nstep_next).any() or name == "done"):
+                ext_b = self._extract(kwargs,name)
+                
+                stored_b[:] = np.tile(self._extract(kwargs,name)[-1],(self.buffer_size,1))
+                kwargs[name] = ext_b
+            else:
+                ext_b = self._extract(kwargs,name)
+
+                if diff_N:
+                    stored_b[self.stored_size:] = ext_b[:diff_N]
+                    ext_b = ext_b[diff_N:]
+
+                self._roll(stored_b,ext_b,end,NisBigger,kwargs,name,add_N)
+            '''
+            elif (self.Nstep_next is not None
                   and np.isin(name,self.Nstep_next).any()):
                 kwargs[name] = self._extract(kwargs,name)[diff_N:]
             else:
@@ -769,15 +783,7 @@ cdef class NstepBuffer:
                     ext_b = ext_b[diff_N:]
 
                 self._roll(stored_b,ext_b,end,NisBigger,kwargs,name,add_N)
-
-        done = kwargs["done"]
-
-        for i in range(1,self.buffer_size):
-            if i <= add_N:
-                done[:-i] += kwargs["done"][i:]
-                done[-i:] += self.buffer["done"][:i]
-            else:
-                done += self.buffer["done"][i-add_N:i]
+            '''
 
         self.stored_size = self.buffer_size
         return kwargs
@@ -817,10 +823,8 @@ cdef class NstepBuffer:
         """
         kwargs = {k: v[:self.stored_size].copy() for k, v in self.buffer.items()}
         done = kwargs["done"]
-
-        for i in range(1,self.stored_size):
-            done[:-i] += kwargs["done"][i:]
-
+        for i in range(self.stored_size):
+            done[i] = 1 - (1 - done[i])/np.power(self.Nstep_gamma,i+1)
         self.clear()
         return kwargs
 
