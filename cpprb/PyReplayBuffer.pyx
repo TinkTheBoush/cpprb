@@ -690,7 +690,10 @@ cdef class NstepBuffer:
                     pass
                 elif (self.Nstep_next is not None
                       and np.isin(name,self.Nstep_next).any()) or name == "done":
-                    stored_b[:end] = np.repeat(np.expand_dims(self._extract(kwargs,name)[-1], axis=0),repeats=end,axis=0)
+                    ext_b = self._extract(kwargs,name)
+                    for i in range(end):
+                        stored_b[i] = ext_b[-1]
+                    #stored_b[:end] = np.repeat(np.expand_dims(self._extract(kwargs,name)[-1], axis=0),repeats=end,axis=0)
                 else:
                     stored_b[self.stored_size:end] = self._extract(kwargs,name)
 
@@ -760,9 +763,13 @@ cdef class NstepBuffer:
             elif (self.Nstep_next is not None
                   and np.isin(name,self.Nstep_next).any() or name == "done"):
                 ext_b = self._extract(kwargs,name)
+
+                if diff_N:
+                    kwargs[name] = ext_b[diff_N:]
                 
-                stored_b[:] = np.repeat(np.expand_dims(ext_b[-1], axis=0),repeats=self.buffer_size,axis=0)
-                kwargs[name] = ext_b
+                for i in range(self.stored_size):
+                    stored_b[i] = ext_b[-1]
+                #stored_b[:] = np.repeat(np.expand_dims(ext_b[-1], axis=0),repeats=self.buffer_size,axis=0)
             else:
                 ext_b = self._extract(kwargs,name)
 

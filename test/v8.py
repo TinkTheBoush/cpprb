@@ -464,7 +464,13 @@ class TestNstepBuffer(unittest.TestCase):
     def test_gamma_with_done(self):
         nb = NstepBuffer({"rew": {}, "done": {}},
                          {"size": 4, "rew": "rew", "gamma": 0.5})
+        
 
+        self.assertIs(nb.add(rew=1,done=0),None)
+        self.assertIs(nb.add(rew=1,done=1),None)
+        np.testing.assert_allclose(nb.on_episode_end()['done'],np.asarray([[1],[1]]))
+
+        ''' on_episode_end must after done
         self.assertIs(nb.add(rew=1,done=0),None)
         self.assertIs(nb.add(rew=1,done=1),None)
         self.assertIs(nb.add(rew=1,done=0),None)
@@ -472,6 +478,7 @@ class TestNstepBuffer(unittest.TestCase):
         np.testing.assert_allclose(nb.add(rew=1,done=0)["done"],np.asarray([[1]]))
         np.testing.assert_allclose(nb.add(rew=1,done=0)["done"],np.asarray([[1]]))
         np.testing.assert_allclose(nb.add(rew=1,done=0)["done"],np.asarray([[0]]))
+        '''
 
     def test_gamma_multi_step(self):
         nb = NstepBuffer({'rew': {}, 'done': {}},
