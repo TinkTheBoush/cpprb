@@ -780,19 +780,6 @@ cdef class NstepBuffer:
                     ext_b = ext_b[diff_N:]
 
                 self._roll(stored_b,ext_b,end,NisBigger,kwargs,name,add_N)
-            '''
-            elif (self.Nstep_next is not None
-                  and np.isin(name,self.Nstep_next).any()):
-                kwargs[name] = self._extract(kwargs,name)[diff_N:]
-            else:
-                ext_b = self._extract(kwargs,name)
-
-                if diff_N:
-                    stored_b[self.stored_size:] = ext_b[:diff_N]
-                    ext_b = ext_b[diff_N:]
-
-                self._roll(stored_b,ext_b,end,NisBigger,kwargs,name,add_N)
-            '''
 
         self.stored_size = self.buffer_size
         return kwargs
