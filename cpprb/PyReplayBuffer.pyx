@@ -760,7 +760,7 @@ cdef class NstepBuffer:
                 # Calculated.
                 pass
             elif (self.Nstep_next is not None
-                  and np.isin(name,self.Nstep_next).any()):
+                  and np.isin(name,self.Nstep_next).any() or name == "done"):
                 ext_b = self._extract(kwargs,name)
                 copy_ext = ext_b.copy()
 
@@ -769,7 +769,6 @@ cdef class NstepBuffer:
                 
                 for i in range(self.buffer_size):
                     stored_b[i] = copy_ext[-1]
-                
             else:
                 ext_b = self._extract(kwargs,name)
 
