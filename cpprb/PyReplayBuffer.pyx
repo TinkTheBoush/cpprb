@@ -689,7 +689,7 @@ cdef class NstepBuffer:
                     # Calculate later.
                     pass
                 elif (self.Nstep_next is not None
-                      and np.isin(name,self.Nstep_next).any()) or name == "done":
+                      and np.isin(name,self.Nstep_next).any()):
                     ext_b = self._extract(kwargs,name)
                     for i in range(end):
                         stored_b[i] = ext_b[-1]
@@ -763,13 +763,15 @@ cdef class NstepBuffer:
             elif (self.Nstep_next is not None
                   and np.isin(name,self.Nstep_next).any() or name == "done"):
                 ext_b = self._extract(kwargs,name)
+                copy_ext = ext_b.copy()
 
                 if diff_N:
-                    kwargs[name] = ext_b[diff_N:]
+                    kwargs[name] = copy_ext[diff_N:]
                 
-                for i in range(self.stored_size):
-                    stored_b[i] = ext_b[-1]
+                for i in range(self.buffer_size):
+                    stored_b[i] = copy_ext[-1]
                 #stored_b[:] = np.repeat(np.expand_dims(ext_b[-1], axis=0),repeats=self.buffer_size,axis=0)
+                
             else:
                 ext_b = self._extract(kwargs,name)
 
@@ -830,11 +832,12 @@ cdef class NstepBuffer:
         """
         kwargs = {k: v[:self.stored_size].copy() for k, v in self.buffer.items()}
         done = kwargs["done"]
-        if done[0]:
-            pass
+        if done[-1]:
+            for i in range(self.stored_size):
+                done[i] = 1
         else:
             for i in range(self.stored_size):
-                done[i] = (1 - done[i])/np.power(self.Nstep_gamma,i+1) - 1
+                done[i] = np.power(self.Nstep_gamma,i+1) - 1
         self.clear()
         return kwargs
 
