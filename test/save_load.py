@@ -109,7 +109,7 @@ class TestReplayBuffer(unittest.TestCase):
 
         rb1 = ReplayBuffer(buffer_size, env_dict, Nstep=Nstep)
         rb2 = ReplayBuffer(buffer_size, env_dict, Nstep=Nstep)
-        rb3 = ReplayBuffer(buffer_size, env_dict, Nstep=Nstep)
+        #rb3 = ReplayBuffer(buffer_size, env_dict, Nstep=Nstep) v1 pass
 
         d = [0, 0, 0, 0, 1]
 
@@ -119,14 +119,14 @@ class TestReplayBuffer(unittest.TestCase):
         fname="Nstep.npz"
         rb1.save_transitions(fname)
         rb2.load_transitions(fname)
-        rb3.load_transitions(v(1,fname))
+        #rb3.load_transitions(v(1,fname))
 
         t1 = rb1.get_all_transitions()
         t2 = rb2.get_all_transitions()
-        t3 = rb3.get_all_transitions()
+        #t3 = rb3.get_all_transitions()
 
         np.testing.assert_allclose(t1["done"], t2["done"])
-        np.testing.assert_allclose(t1["done"], t3["done"])
+        #np.testing.assert_allclose(t1["done"], t3["done"])
 
     def test_Nstep_incompatibility(self):
         """

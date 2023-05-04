@@ -693,7 +693,6 @@ cdef class NstepBuffer:
                     ext_b = self._extract(kwargs,name)
                     for i in range(end):
                         stored_b[i] = ext_b[-1]
-                    #stored_b[:end] = np.repeat(np.expand_dims(self._extract(kwargs,name)[-1], axis=0),repeats=end,axis=0)
                 else:
                     stored_b[self.stored_size:end] = self._extract(kwargs,name)
 
@@ -761,7 +760,7 @@ cdef class NstepBuffer:
                 # Calculated.
                 pass
             elif (self.Nstep_next is not None
-                  and np.isin(name,self.Nstep_next).any() or name == "done"):
+                  and np.isin(name,self.Nstep_next).any()):
                 ext_b = self._extract(kwargs,name)
                 copy_ext = ext_b.copy()
 
@@ -770,7 +769,6 @@ cdef class NstepBuffer:
                 
                 for i in range(self.buffer_size):
                     stored_b[i] = copy_ext[-1]
-                #stored_b[:] = np.repeat(np.expand_dims(ext_b[-1], axis=0),repeats=self.buffer_size,axis=0)
                 
             else:
                 ext_b = self._extract(kwargs,name)
@@ -810,12 +808,12 @@ cdef class NstepBuffer:
         kwargs[name] = copy_ext[:add_N]
 
     cpdef void clear(self):
-        """Clear the bufer.
+        r"""Clear the bufer.
         """
         self.stored_size = 0
 
     cpdef on_episode_end(self):
-        """Terminate episode.
+        r"""Terminate episode.
         """
         kwargs = {k: v[:self.stored_size].copy() for k, v in self.buffer.items()}
         done = kwargs["done"]
@@ -829,7 +827,7 @@ cdef class NstepBuffer:
         return kwargs
 
     cpdef size_t get_Nstep_size(self):
-        """Get Nstep size
+        r"""Get Nstep size
 
         Returns
         -------
