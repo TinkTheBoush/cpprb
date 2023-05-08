@@ -47,28 +47,124 @@ This modified cpprb used at [[https://github.com/TinkTheBoush/haiku-baseline][ha
 
 * Fixed issue
 
-** Empty next step issue
+Not all episode end meaning done is true.
+
+So i fixed this issues as below.
+
+** Empty last next step and missing done issue
 
 original cpprb has issue that next step is empty(all 1. states) when episode end.
 
-```
+#+begin_src python
 #testing code in haiku-baseline rb
+
+n_step = 4
+gamma = 0.995
+
 for i in range(11):
     if i % 20 == 10:
-        rb.add([np.arange(i,i+4)], 1, 1, [np.arange(i+4,i+8)], true_done, False)
+        rb.add([np.arange(i,i+4)], 1, 1, [np.arange(i+4,i+8)], True, False)
         rb.episode_end()
     else:
         rb.add([np.arange(i,i+4)], 1, 1, [np.arange(i+4,i+8)], False, False)
-```
+#printing rb transitions
+#+END_SRC
 
-```
+#+begin_src python
 # original cpprb
 
-# modified cpprb
+obs0: [0. 1. 2. 3.], action: [1.], reward: [3.9701], next_obs0: [ 7.  8.  9. 10.], done: [0.], 
+obs0: [1. 2. 3. 4.], action: [1.], reward: [3.9701], next_obs0: [ 8.  9. 10. 11.], done: [0.], 
+obs0: [2. 3. 4. 5.], action: [1.], reward: [3.9701], next_obs0: [ 9. 10. 11. 12.], done: [0.], 
+obs0: [3. 4. 5. 6.], action: [1.], reward: [3.9701], next_obs0: [10. 11. 12. 13.], done: [0.], 
+obs0: [4. 5. 6. 7.], action: [1.], reward: [3.9701], next_obs0: [11. 12. 13. 14.], done: [0.], 
+obs0: [5. 6. 7. 8.], action: [1.], reward: [3.9701], next_obs0: [12. 13. 14. 15.], done: [0.], 
+obs0: [6. 7. 8. 9.], action: [1.], reward: [3.9701], next_obs0: [13. 14. 15. 16.], done: [0.], 
+obs0: [ 7.  8.  9. 10.], action: [1.], reward: [3.9701], next_obs0: [14. 15. 16. 17.], done: [0.], # This step must be done is true!!
+obs0: [ 8.  9. 10. 11.], action: [1.], reward: [2.985025], next_obs0: [1. 1. 1. 1.], done: [1.], # empty next step with done
+obs0: [ 9. 10. 11. 12.], action: [1.], reward: [1.995], next_obs0: [1. 1. 1. 1.], done: [1.], # empty next step with done
+obs0: [10. 11. 12. 13.], action: [1.], reward: [1.], next_obs0: [1. 1. 1. 1.], done: [1.], # empty next step with done
 
-```
+# modified
+
+obs0: [0. 1. 2. 3.], action: [1.], reward: [3.9701], next_obs0: [ 7.  8.  9. 10.], done: [0.], 
+obs0: [1. 2. 3. 4.], action: [1.], reward: [3.9701], next_obs0: [ 8.  9. 10. 11.], done: [0.], 
+obs0: [2. 3. 4. 5.], action: [1.], reward: [3.9701], next_obs0: [ 9. 10. 11. 12.], done: [0.], 
+obs0: [3. 4. 5. 6.], action: [1.], reward: [3.9701], next_obs0: [10. 11. 12. 13.], done: [0.], 
+obs0: [4. 5. 6. 7.], action: [1.], reward: [3.9701], next_obs0: [11. 12. 13. 14.], done: [0.], 
+obs0: [5. 6. 7. 8.], action: [1.], reward: [3.9701], next_obs0: [12. 13. 14. 15.], done: [0.], 
+obs0: [6. 7. 8. 9.], action: [1.], reward: [3.9701], next_obs0: [13. 14. 15. 16.], done: [0.], 
+obs0: [ 7.  8.  9. 10.], action: [1.], reward: [3.9701], next_obs0: [14. 15. 16. 17.], done: [1.], 
+obs0: [ 8.  9. 10. 11.], action: [1.], reward: [2.985025], next_obs0: [14. 15. 16. 17.], done: [1.], 
+obs0: [ 9. 10. 11. 12.], action: [1.], reward: [1.995], next_obs0: [14. 15. 16. 17.], done: [1.], 
+obs0: [10. 11. 12. 13.], action: [1.], reward: [1.], next_obs0: [14. 15. 16. 17.], done: [1.],
+
+#+END_SRC
 
 ** Undoned terminate episode issue
+
+But what if we have episode end but done is false?
+
+This issue could be happen when we have time limit for episode.
+
+#+begin_src python
+#testing code in haiku-baseline rb
+
+n_step = 4
+gamma = 0.995
+
+for i in range(11):
+    if i % 20 == 10:
+        rb.add([np.arange(i,i+4)], 1, 1, [np.arange(i+4,i+8)], False, False)
+        rb.episode_end()
+    else:
+        rb.add([np.arange(i,i+4)], 1, 1, [np.arange(i+4,i+8)], False, False)
+#printing rb transitions
+#+END_SRC
+
+#+begin_src python
+# original cpprb
+
+obs0: [0. 1. 2. 3.], action: [1.], reward: [3.9701], next_obs0: [ 7.  8.  9. 10.], done: [0.], 
+obs0: [1. 2. 3. 4.], action: [1.], reward: [3.9701], next_obs0: [ 8.  9. 10. 11.], done: [0.], 
+obs0: [2. 3. 4. 5.], action: [1.], reward: [3.9701], next_obs0: [ 9. 10. 11. 12.], done: [0.], 
+obs0: [3. 4. 5. 6.], action: [1.], reward: [3.9701], next_obs0: [10. 11. 12. 13.], done: [0.], 
+obs0: [4. 5. 6. 7.], action: [1.], reward: [3.9701], next_obs0: [11. 12. 13. 14.], done: [0.], 
+obs0: [5. 6. 7. 8.], action: [1.], reward: [3.9701], next_obs0: [12. 13. 14. 15.], done: [0.], 
+obs0: [6. 7. 8. 9.], action: [1.], reward: [3.9701], next_obs0: [13. 14. 15. 16.], done: [0.], 
+obs0: [ 7.  8.  9. 10.], action: [1.], reward: [3.9701], next_obs0: [14. 15. 16. 17.], done: [0.], # same
+obs0: [ 8.  9. 10. 11.], action: [1.], reward: [2.985025], next_obs0: [1. 1. 1. 1.], done: [0.], # error!! next_obs is empty!!
+obs0: [ 9. 10. 11. 12.], action: [1.], reward: [1.995], next_obs0: [1. 1. 1. 1.], done: [0.], # error!! next_obs is empty!!
+obs0: [10. 11. 12. 13.], action: [1.], reward: [1.], next_obs0: [1. 1. 1. 1.], done: [0.], # error!! next_obs is empty!!
+
+# modified
+
+obs0: [0. 1. 2. 3.], action: [1.], reward: [3.9701], next_obs0: [ 7.  8.  9. 10.], done: [0.], 
+obs0: [1. 2. 3. 4.], action: [1.], reward: [3.9701], next_obs0: [ 8.  9. 10. 11.], done: [0.], 
+obs0: [2. 3. 4. 5.], action: [1.], reward: [3.9701], next_obs0: [ 9. 10. 11. 12.], done: [0.], 
+obs0: [3. 4. 5. 6.], action: [1.], reward: [3.9701], next_obs0: [10. 11. 12. 13.], done: [0.], 
+obs0: [4. 5. 6. 7.], action: [1.], reward: [3.9701], next_obs0: [11. 12. 13. 14.], done: [0.], 
+obs0: [5. 6. 7. 8.], action: [1.], reward: [3.9701], next_obs0: [12. 13. 14. 15.], done: [0.], 
+obs0: [6. 7. 8. 9.], action: [1.], reward: [3.9701], next_obs0: [13. 14. 15. 16.], done: [0.], 
+obs0: [ 7.  8.  9. 10.], action: [1.], reward: [3.9701], next_obs0: [14. 15. 16. 17.], done: [0.], # next_obs is over 4 step, gamma^4*q(next_obs) = (1 - done)*gamma^4*q(next_obs)
+obs0: [ 8.  9. 10. 11.], action: [1.], reward: [2.985025], next_obs0: [14. 15. 16. 17.], done: [-0.005], # next_obs is over 3 step, gamma^3*q(next_obs) = (1 - done)*gamma^4*q(next_obs)
+obs0: [ 9. 10. 11. 12.], action: [1.], reward: [1.995], next_obs0: [14. 15. 16. 17.], done: [-0.00997499],  # next_obs is over 2 step, gamma^2*q(next_obs) = (1 - done)*gamma^4*q(next_obs)
+obs0: [10. 11. 12. 13.], action: [1.], reward: [1.], next_obs0: [14. 15. 16. 17.], done: [-0.01492511],  # next_obs is over 1 step, gamma^1*q(next_obs) = (1 - done)*gamma^4*q(next_obs)
+#+END_SRC
+
+#+begin_src python
+#printing target queue multiplier
+for i in range(n,0,-1):
+    d = transition[k][-i]
+    print(d, (1 - d) * np.power(gamma,n), " = ", np.power(gamma,i))
+#+END_SRC
+
+#+begin_src python
+[0.] [0.9801495]  =  0.980149500625
+[-0.005] [0.98505026]  =  0.985074875
+[-0.00997499] [0.98992646]  =  0.990025
+[-0.01492511] [0.99477834]  =  0.995
+#+END_SRC
 
 * Overview
 
