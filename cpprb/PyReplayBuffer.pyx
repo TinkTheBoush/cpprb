@@ -2039,8 +2039,8 @@ cdef class MPReplayBuffer:
         self.explorer_count_lock = ctx.Lock()
 
     cdef void _lock_explorer(self) except *:
-        self.learner_ready.clear()  # Block learner !!! maybe block section must be first?
         self.explorer_ready.wait() # Wait permission
+        self.learner_ready.clear()  # Block learner
         with self.explorer_count_lock:
             self.explorer_count.value += 1
 
