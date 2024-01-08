@@ -43,7 +43,7 @@ This is modified version of cpprb([[https://github.com/ymd-h/cpprb][orignial]])!
 
 Minor fixing n_step buffer by my own rules.
 
-This modified cpprb used at [[https://github.com/TinkTheBoush/haiku-baseline][haiku-baseline]].
+This modified cpprb used at [[https://github.com/tinker495/jax-baseline][jax-baseline]].
 
 * Fixed issue
 
